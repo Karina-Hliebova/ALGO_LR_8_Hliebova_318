@@ -1,0 +1,157 @@
+#include <iostream>
+#include "windows.h"
+#include <string>
+#include <fstream>
+using namespace std;
+
+const int M = 20, N = 20; // максимальна допустима кількість рядків та стовпців
+char inputFile[] = "array_79_in.txt";
+char outputFile[] = "array_79_out.txt";
+char Filename[] = "array_79";
+
+// Функції для роботи з одновимірними масивами
+void get_mas(string Filename, int in_mas[N], int& in_n); // Зчитування масиву з файлу
+void show_mas(string Filename, const int out_mas[N], const int n); // Виведення масиву у файл
+
+// Функції для роботи з двовимірними масивами
+void get_matrix(string Filename, int in_mx[N][M], int& in_n, int& in_m); // Зчитування матриці з файлу
+void show_matrix(string Filename, const int out_mx[M][N], const int n, const int m); // Виведення матриці у файл
+
+
+//За допомогою текстового редактору створити текстовий файл «array_in_n.txt» з елементами
+// вихідного масиву(n - номер варіанта).У програмі на С++ зчитати і перетворити цей масив 
+// відповідно до свого варіанту завдання(див.лаб.роб.No6, завд.2), ім'я файлу і необхідні змінні 
+// ввести з консолі.Вивести результати у файл «array_out_n.txt».
+void task_array_79(); // завдання 1
+
+int main()
+{
+    SetConsoleOutputCP(1251);
+    int menu; // Зміна для номеру завдання
+    do
+    { // початок циклу
+        cout << "Номер завдання:"; //введення номеру завдання
+        cin >> menu; // обирання номеру завдання
+        cout << endl; //вільна строка
+        switch (menu) {
+        case 1: task_array_79(); break; // 1 - завдання 1
+       // case 2: task_matrix71(); break; // 2 - завдання 2
+       // case 3: task_3(); break; // 3 - завдання 3
+        case -1: cout << "Вихід..." << endl; break; // -1 - вихід
+        default: cout << "Помилка! Лише 1, 2!" << endl; // інший номер - повторити
+        }
+        cout << endl; // вільна строка
+        cout << "+---------------------+" << endl; // строка задля полегшення візуального сприймання тексту
+        cout << endl; // вільна строка
+    } // кінець циклу
+    while (menu != -1); // умова виконання циклу
+    return 0;
+}
+
+// Функція для зчитування масиву з файлу
+void get_mas(string Filename, int in_mas[N], int& in_n) {
+    ifstream inputFile(Filename);
+
+    if (!inputFile) {
+        cerr << "Не вдалося відкрити файл для зчитування: " << Filename << endl;
+        return;
+    }
+
+    in_n = 0;
+    while (inputFile >> in_mas[in_n]) {
+        in_n++;
+    }
+
+    inputFile.close();
+}
+
+// Функція для виведення масиву в файл
+void show_mas(string Filename, const int out_mas[N], const int n) {
+    ofstream outputFile(Filename);
+
+    if (!outputFile) {
+        cerr << "Не вдалося відкрити файл для запису: " << Filename << endl;
+        return;
+    }
+
+    for (int i = 0; i < n; i++) {
+        outputFile << out_mas[i] << " ";
+    }
+
+    outputFile.close();
+}
+
+// Функція для зчитування матриці з файлу
+void get_matrix(string Filename, int in_mx[N][M], int& in_n, int& in_m) {
+    ifstream inputFile(Filename);
+
+    if (!inputFile) {
+        cerr << "Не вдалося відкрити файл для зчитування: " << Filename << endl;
+        return;
+    }
+
+    in_n = 0;
+    while (inputFile) {
+        for (in_m = 0; in_m < M; in_m++) {
+            if (inputFile >> in_mx[in_n][in_m]) {
+                // продовжуємо зчитування
+            }
+            else {
+                break;
+            }
+        }
+        in_n++;
+    }
+
+    inputFile.close();
+}
+
+// Функція для виведення матриці в файл
+void show_matrix(string Filename, const int out_mx[M][N], const int n, const int m) {
+    ofstream outputFile(Filename);
+
+    if (!outputFile) {
+        cerr << "Не вдалося відкрити файл для запису: " << Filename << endl;
+        return;
+    }
+
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < m; j++) {
+            outputFile << out_mx[i][j] << " ";
+        }
+        outputFile << endl;
+    }
+
+    outputFile.close();
+}
+void task_array_79() {
+    string inputFileName, outputFileName;
+
+    // Введення імені вхідного і вихідного файлів
+    cout << "Введіть ім'я вхідного файлу: ";
+    cin >> inputFileName;
+
+    cout << "Введіть ім'я вихідного файлу: ";
+    cin >> outputFileName;
+
+    int arr[N], n;
+
+    // Зчитування масиву з файлу
+    get_mas(inputFileName, arr, n);
+
+    // Перевірка чи масив не порожній
+    if (n == 0) {
+        cerr << "Масив порожній!" << endl;
+    }
+
+    // Зрушення елементів вправо
+    for (int i = n - 1; i > 0; i--) {
+        arr[i] = arr[i - 1];
+    }
+    arr[0] = 0; // Перший елемент рівний нулю
+
+    // Запис результату у файл
+    show_mas(outputFileName, arr, n);
+
+    cout << "Результат записано у файл " << outputFileName << endl;
+}

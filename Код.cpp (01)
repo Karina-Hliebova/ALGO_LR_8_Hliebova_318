@@ -1,28 +1,42 @@
 #include <iostream>
 #include "windows.h"
-#include <string>
 #include <fstream>
 using namespace std;
 
-const int M = 20, N = 20; // максимальна допустима кількість рядків та стовпців
-char inputFile[] = "array_79_in.txt";
-char outputFile[] = "array_79_out.txt";
-char Filename[] = "array_79";
+const int N = 20, M = 20, S = 7; 
 
-// Функції для роботи з одновимірними масивами
-void get_mas(string Filename, int in_mas[N], int& in_n); // Зчитування масиву з файлу
-void show_mas(string Filename, const int out_mas[N], const int n); // Виведення масиву у файл
+bool get_mas(char* filename, int in_mas[N], int& in_n);
+void show_mas(const int in_mas[N], const int n);
+void write_mas(const int in_mas[N], const int n);
+void shift_array_right(int mas[N], int & n);
 
-// Функції для роботи з двовимірними масивами
-void get_matrix(string Filename, int in_mx[N][M], int& in_n, int& in_m); // Зчитування матриці з файлу
-void show_matrix(string Filename, const int out_mx[M][N], const int n, const int m); // Виведення матриці у файл
+bool get_matr(char* filename, int in_matr[M][M], int& in_m, int& in_n);
+void write_result_task_2(char* filename, int res);
+void show_matr(const int matr[M][M],const int m, const int n);
+int processed_task_2(const int matr[M][M],const int m, const int n);
 
+void sort(int arr[], int n);
+bool get_sort(const char* filename, int arr[], int& n);
+void write_sort(const char* filename, const int arr[], int n);
+void show_sort(const int arr[], int n);
 
 //За допомогою текстового редактору створити текстовий файл «array_in_n.txt» з елементами
 // вихідного масиву(n - номер варіанта).У програмі на С++ зчитати і перетворити цей масив 
 // відповідно до свого варіанту завдання(див.лаб.роб.No6, завд.2), ім'я файлу і необхідні змінні 
-// ввести з консолі.Вивести результати у файл «array_out_n.txt».
+// ввести з консолі.Вивести результати у файл «array_out_n.txt».*/
 void task_array_79(); // завдання 1
+
+//За допомогою текстового редактору створити текстовий файл «matr_in_n.txt» з елементами 
+// вихідного двовимірного масиву(n - номер варіанта).У програмі зчитати і обробити матрицю відповідно
+// до свого варіанту завдання(лаб.роб.No7, завд.1), ім'я файлу і необхідні змінні ввести з консолі.
+// Дописати результати в той же файл.
+void task_matrix71(); // завдання 2
+
+// Вивчити метод сортування відповідно до свого варіанту (див табл. 1), проаналізувати його складність 
+// і продемонструвати на прикладі з 7 - ми елементів(відповідно до свого варіанту).Реалізувати у вигляді 
+// окремої функції алгоритм сортування елементів масиву.Зчитування і виведення відсортованого 
+// масиву організувати на файлах.
+void task_3(); // завдання 3
 
 int main()
 {
@@ -35,8 +49,8 @@ int main()
         cout << endl; //вільна строка
         switch (menu) {
         case 1: task_array_79(); break; // 1 - завдання 1
-       // case 2: task_matrix71(); break; // 2 - завдання 2
-       // case 3: task_3(); break; // 3 - завдання 3
+        case 2: task_matrix71(); break; // 2 - завдання 2
+        case 3: task_3(); break; // 3 - завдання 3
         case -1: cout << "Вихід..." << endl; break; // -1 - вихід
         default: cout << "Помилка! Лише 1, 2!" << endl; // інший номер - повторити
         }
@@ -48,110 +62,240 @@ int main()
     return 0;
 }
 
-// Функція для зчитування масиву з файлу
-void get_mas(string Filename, int in_mas[N], int& in_n) {
-    ifstream inputFile(Filename);
-
-    if (!inputFile) {
-        cerr << "Не вдалося відкрити файл для зчитування: " << Filename << endl;
-        return;
+//Функція для зчитування елементів масиву з файлу
+bool get_mas(char* filename, int in_mas[N], int& in_n) {
+    ifstream fin("array_in_8.txt"); // відкриваємо файл для зчитування
+    if (!fin.is_open()) { // перевірка на наявність помилки при відкритті файлу
+        cout << "Помилка! Не вдалося відкрити файл!" << endl;
+        return false;  // повертаємо false, якщо файл не вдалося відкрити
     }
-
-    in_n = 0;
-    while (inputFile >> in_mas[in_n]) {
-        in_n++;
-    }
-
-    inputFile.close();
-}
-
-// Функція для виведення масиву в файл
-void show_mas(string Filename, const int out_mas[N], const int n) {
-    ofstream outputFile(Filename);
-
-    if (!outputFile) {
-        cerr << "Не вдалося відкрити файл для запису: " << Filename << endl;
-        return;
-    }
-
-    for (int i = 0; i < n; i++) {
-        outputFile << out_mas[i] << " ";
-    }
-
-    outputFile.close();
-}
-
-// Функція для зчитування матриці з файлу
-void get_matrix(string Filename, int in_mx[N][M], int& in_n, int& in_m) {
-    ifstream inputFile(Filename);
-
-    if (!inputFile) {
-        cerr << "Не вдалося відкрити файл для зчитування: " << Filename << endl;
-        return;
-    }
-
-    in_n = 0;
-    while (inputFile) {
-        for (in_m = 0; in_m < M; in_m++) {
-            if (inputFile >> in_mx[in_n][in_m]) {
-                // продовжуємо зчитування
-            }
-            else {
-                break;
-            }
+    else { 
+        fin >> in_n; // розмір масиву зчитується з файлу
+        for (int i = 0; i < in_n; i++) {  // елементи масиву зчитуються з файлу
+            fin >> in_mas[i];
         }
-        in_n++;
     }
-
-    inputFile.close();
+    fin.close();  // файл закривається після зчитування
+    return true;  // повертається true, якщо зчитування пройшло успішно
 }
 
-// Функція для виведення матриці в файл
-void show_matrix(string Filename, const int out_mx[M][N], const int n, const int m) {
-    ofstream outputFile(Filename);
-
-    if (!outputFile) {
-        cerr << "Не вдалося відкрити файл для запису: " << Filename << endl;
-        return;
+// Функція для виведення елементів масиву до консолі
+void show_mas(const int mas[N], const int n) {
+    for (int i = 0; i < n; i++) { 
+        cout << mas[i] << " "; // виводимо елементи масиву
     }
+    cout << endl;  // перехід на новий рядок після виведення всіх елементів
+}
 
-    for (int i = 0; i < n; i++) {
-        for (int j = 0; j < m; j++) {
-            outputFile << out_mx[i][j] << " ";
+// Функція для запису елементів масиву в файл
+void write_mas(const int mas[N], const int n) {
+    ofstream fout("array_out_8.txt"); // відкриваємо файл для запису
+    for (int i = 0; i < n; i++) { // елементи масиву записуються у файл
+        fout << mas[i] << " ";
+    }
+    fout.close(); // після запису файл закривається
+}
+
+// Функція для обробки завдання: зсув елементів масиву вправо
+void shift_array_right(int mas[N], int& n) {
+    if (n > 1) { // перевірка, чи масив містить більше одного елементу
+        // починаємо з останнього елементу і зсуваємо кожен елемент вправо
+        for (int i = n - 1; i > 0; i--) {
+            mas[i] = mas[i - 1];
         }
-        outputFile << endl;
+        mas[0] = 0; // перший елемент стає 0
     }
-
-    outputFile.close();
 }
+
+// Основна функція для виконання завдання
 void task_array_79() {
-    string inputFileName, outputFileName;
+    int mas[N];  // масив для зберігання елементів
+    int size;    // розмір масиву
+    char filename[100];  // назва файлу для введення/виведення
+    cout << "Введіть назву файлу (array_in_8.txt): " << endl; // введення назви файлу, який потрібно відкрити
+    cin.ignore(); // звільнення буфера вводу
+    cin.getline(filename, 100); // вводимо назву файлу з консолі
+    cout << filename << endl; // виведення файлу
 
-    // Введення імені вхідного і вихідного файлів
-    cout << "Введіть ім'я вхідного файлу: ";
-    cin >> inputFileName;
+    if (get_mas(filename, mas, size)) { // виклик функції для зчитування масиву з файлу
+        cout << "Початковий масив:\t\t\t";// якщо масив успішно зчитано, виводиться його на екран
+        show_mas(mas, size);
 
-    cout << "Введіть ім'я вихідного файлу: ";
-    cin >> outputFileName;
+        shift_array_right(mas, size); // зсув елементів масиву вправо
+        cout << "Масив після зрушення:\t"; // виведення масиву після зрушення
 
-    int arr[N], n;
+        show_mas(mas, size);
+        write_mas(mas, size); // запис обробленого масиву у файл
+    }
+}
 
-    // Зчитування масиву з файлу
-    get_mas(inputFileName, arr, n);
+//Функція для зчитування елементів матриці з файлу
+bool get_matr(char* filename, int in_matr[M][M], int& in_m, int& in_n) {
+    ifstream fin("matr_in_8.txt"); // відкриття файлу для зчитування
+    if (!fin.is_open()) { // якщо виникла помилка
+        cout << "Помилка! Не вдалося відкрити файл!" << endl; // виводимо сповіщення про це
+        return false; // повернення значення як false
+    }
+    else { // в іншому випадку
+        fin >> in_m; // зчитується кільксть рядків
+        fin >> in_n; // та стовпців
+        for (int i = 0; i < in_m; i++) { // зчитуються елементи матриці
+            for (int j = 0; j < in_n; j++) {
+                fin >> in_matr[i][j]; // кожен елемент зчитується
+            }
+        }
+    }
+    fin.close(); // закриття програми
+    return true;
+}
 
-    // Перевірка чи масив не порожній
-    if (n == 0) {
-        cerr << "Масив порожній!" << endl;
+//Функція для виведення елементів матриці до консолі
+void show_matr(const int matr[M][M], const int m, const int n) {
+    for (int i = 0; i < m; i++) { // зчитуються рядки матриці
+        for (int j = 0; j < n; j++) { // зчитуються стовпці матриці
+            cout << matr[i][j] << "  "; // виведення поточного елементу матриці з пробілом
+        }
+        cout << endl; // після кожного рядка матриці перехід на новий рядок
+    }
+}
+
+ //Функція для запису результату завдання 2 в файл
+void write_result_task_2(char* filename, int res) {
+  ofstream fout("matr_out_8.txt"); // виведення файлу з результатами
+  fout <<"\nПродубльований стовпець: " << res; // виведення результату
+  fout.close(); // файл закривається після зчитування
+}
+
+// Функція для обробки завдання 2
+int processed_task_2(int matr[M][M], int m, int n) {
+    // знаходження мінімального елемента у матриці та його стовпець
+    int min_val = matr[0][0];  // припущення, що перший елемент - мінімальний
+    int min_col = 0; // індекс стовпця, де знаходиться мінімальний елемент
+
+    // проходимо по всіх елементах матриці, щоб знайти мінімальний елемент
+    for (int i = 0; i < m; i++) { // проходимо по рядках матриці 
+        for (int j = 0; j < n; j++) { // проходимо по стовпцях матриці
+            if (matr[i][j] < min_val) { // якщо поточний елемент менший за мінімальний,
+                min_val = matr[i][j]; // оновлення мінімального значення
+                min_col = j; // оновлення індекса стовпця з мінімальним елементом
+            }
+        }
     }
 
-    // Зрушення елементів вправо
-    for (int i = n - 1; i > 0; i--) {
-        arr[i] = arr[i - 1];
+    for (int i = 0; i < m; i++) { // дублювання стовпця, що містить мінімальний елемент
+        // зсув всіх елементів праворуч від стовпця, що містить мінімум
+        for (int j = n; j > min_col; j--) {
+            matr[i][j] = matr[i][j - 1];
+        }
+        matr[i][min_col + 1] = matr[i][min_col]; // дублювання значення мінімального стовпця
     }
-    arr[0] = 0; // Перший елемент рівний нулю
 
-    // Запис результату у файл
-    show_mas(outputFileName, arr, n);
+    n++; // оновлення кількості стовпців
 
-    cout << "Результат записано у файл " << outputFileName << endl;
+    return n;  // повернення нової кількості стовпців
+}
+
+// Функція для виконання завдання 2
+void task_matrix71() {
+    int matr[M][N];  // матриця розміру M x N
+    int row, col;    // кількість рядків і стовпців
+    char filename[100];  // ім'я файлу
+
+    cout << "Введіть назву файлу (matr_in_8.txt): " << endl; // введення назви файлу
+    cin.ignore(); // звільнення буфера вводу
+    cin.getline(filename, 100);  // введення імені файлу
+
+    if (get_matr(filename, matr, row, col)) { // якщо зчитування матриці з файлу вдалося
+        cout << "Початкова матриця: " << endl; // виводимо початкову матрицю
+        show_matr(matr, row, col);  // фунуція виведення матриці на екран 
+
+        // Оброблення завдання
+        int new_col_count = processed_task_2(matr, row, col);  // дублювання стовпця
+
+        cout << "Матриця після дублювання рядка: " << endl; // виведення повідомлення про дублювання
+        show_matr(matr, row, new_col_count);  // виведення матриці після зміни
+
+        write_result_task_2(filename, new_col_count); // запис результату у файл
+    }
+}
+
+// Функція для сортування масиву методом вибору 
+void sort(int arr[], int n) {
+    for (int i = 0; i < n - 1; i++) { // пошук мінімального елемента у невідсортованій частині
+        int minIndex = i; // індекс мінімального елемента на поточному кроці
+        for (int j = i + 1; j < n; j++) { // пошук мінімального елемента в залишковій частині масиву
+            if (arr[j] < arr[minIndex]) { // якщо знаходимо менший елемент,
+                minIndex = j; // оновлюємо індексу мінімального елемента
+            }
+        }
+        if (minIndex != i) {  // обмін місцями мінімального елемента з елементом на позиції i
+            swap(arr[i], arr[minIndex]); // обмін місцями
+        }
+    }
+}
+
+// Функція для зчитування масиву з файлу
+bool get_sort(const char* filename, int arr[], int& n) {
+    ifstream fin(filename); // відкриття файлу для зчитування
+    if (!fin.is_open()) {  // перевірка на успішне відкриття файлу
+        cout << "Не вдалося відкрити файл!" << endl; // виведення повідомлення про помилку
+        return false; 
+    }
+    fin >> n;  // зчитування кількості елементів масиву
+
+    if (n > S) {  // перевірка, чи кількість елементів не перевищує максимальний розмір S
+        // виведення сповіщення про помилку
+        cout << "Кількість елементів у файлі перевищує максимальний розмір масиву (" << S << "). Буде обрано лише " << S << " елементів." << endl;
+        n = S;  // обмеження кількості елементів
+    }
+
+    for (int i = 0; i < n; i++) { // зчитування елементів масиву з файлу
+        fin >> arr[i]; // зчитування кожного елементу масиву
+    }
+    fin.close(); // закриття файлу після зчитування
+    return true;
+}
+
+// Функція для запису масиву в файл
+void write_sort(const char* filename, const int arr[], int n) {
+    ofstream fout("sort_out_8.txt"); // відкриття файлу для запису
+    if (!fout.is_open()) { // перевірка на успішне відкриття файлу
+        cout << "Не вдалося відкрити файл для запису!" << endl; // якщо файл не вдалося відкрити, виводимо помилку
+        return; // якщо не вдалося відкрити файл, функція завершується
+    }
+    for (int i = 0; i < n; i++) { // запис елементів масиву у файл
+        fout << arr[i] << " "; // запис кожного елементу масиву через пробіл
+    }
+    fout.close(); // закриття файлу після запису
+}
+
+// Функція для виведення масиву на екран
+void show_sort(const int arr[], int n) {
+    for (int i = 0; i < n; i++) {
+        cout << arr[i] << " "; // виведення кожного елементу масиву
+    }
+    cout << endl; // після виведення масиву додаємо новий рядок
+}
+
+void task_3() { // вирішення завдання 3
+    int arr [S];  // масив для сортування
+    int n; // кількість елементів масиву
+    char filename[100];  // ім'я файлу
+
+    cout << "Введіть назву файлу (sort_in_8.txt): " << endl; // введення назви файлу
+    cin.ignore(); // звільнення буфера вводу
+    cin.getline(filename, 100);  // введення імені файлу
+
+    if (get_sort(filename, arr, n)) { // якщо зчитування масиву з файлу вдалося
+        cout << "Початковий масив: " << endl; // виведення початкового масиву
+        write_sort(filename, arr, n);  // запис початкового масиву у файл
+
+        // сортування масиву
+        sort(arr, n);  // виклик функції сортування
+
+        cout << "Відсортований масив: " << endl; // виведення відсортованого масиву
+        show_sort(arr, n);  // виведення відсортованого масиву на екран
+
+        write_sort(filename, arr, n); // запис відсортованого масиву в файл
+    }
 }
